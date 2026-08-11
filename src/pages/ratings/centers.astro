@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const centers = [{name:'Аттестационный центр «Прометей»',city:'Москва',score:'4,82',votes:184},{name:'Центр сварочных технологий',city:'Екатеринбург',score:'4,76',votes:152},{name:'Регион-АЦ',city:'Казань',score:'4,68',votes:119}];
+---
+<BaseLayout title="Рейтинг аттестационных центров — СВАРКОД"><header class="page-hero shell"><p class="eyebrow">Рейтинг 2026</p><h1>Аттестационные центры</h1><p>Демонстрация структуры рейтинга. Позиции и организации на этой странице вымышлены и не являются редакционной оценкой.</p></header><section class="shell ranking"><div class="ranking-head"><span>Место и организация</span><span>Оценка</span></div>{centers.map((center,i)=><article><strong class="place">{String(i+1).padStart(2,'0')}</strong><div><h2>{center.name}</h2><p>{center.city} · {center.votes} подтверждённых голосов</p></div><strong class="rating-score">{center.score}<small>/ 5</small></strong></article>)}<div class="note"><strong>Прозрачность</strong><p>После запуска здесь будут опубликованы методика, правила верификации и журнал пересмотров результатов.</p></div></section></BaseLayout>

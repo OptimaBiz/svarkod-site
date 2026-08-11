@@ -1,0 +1,7 @@
+---
+const { article, large = false } = Astro.props;
+---
+<article class:list={['article-card', { large }]}>
+  <div class="article-visual" aria-hidden="true"><span>{article.section}</span></div>
+  <div class="article-body"><div class="meta"><span>{article.section}</span><time>{article.date}</time><span>{article.read}</span></div><h3><a href={`/articles/${article.slug}/`}>{article.title}</a></h3><p>{article.lead}</p><a class="read-more" href={`/articles/${article.slug}/`}>Читать материал <span>→</span></a></div>
+</article>

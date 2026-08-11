@@ -1,0 +1,34 @@
+---
+import '../styles/global.css';
+import { nav } from '../data/site';
+const { title = 'СВАРКОД — Код сварочной отрасли', description = 'Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip" href="#content">К содержанию</a>
+    <header class="site-header">
+      <div class="topline shell"><span>Независимое отраслевое издание</span><a href="/advertising/">Реклама и партнёрство</a></div>
+      <div class="brandline shell">
+        <a class="brand" href="/" aria-label="СВАРКОД — на главную"><span>СВАР</span><b>КОД</b><small>Код сварочной отрасли</small></a>
+        <div class="header-actions"><a class="search-link" href="/search/" aria-label="Поиск">⌕ <span>Поиск</span></a><a class="button button-small" href="#subscribe">Подписаться</a></div>
+      </div>
+      <nav class="main-nav" aria-label="Основная навигация"><div class="shell nav-inner">{nav.map(item => <a class={Astro.url.pathname.startsWith(item.href) ? 'active' : ''} href={item.href}>{item.label}</a>)}<a class="forum" href="https://forum.svarkod.ru">Форум ↗</a></div></nav>
+    </header>
+    <main id="content"><slot /></main>
+    <section class="subscribe" id="subscribe"><div class="shell subscribe-grid"><div><p class="eyebrow light">Рассылка СВАРКОД</p><h2>Главное для сварочной отрасли — без информационного шума</h2><p>Новые нормы, практические разборы и важные события. Один раз в неделю.</p></div><form action="#" method="post"><label class="sr-only" for="email">Рабочая почта</label><input id="email" type="email" placeholder="Рабочая почта" required /><button class="button light-button">Подписаться</button><small>Нажимая кнопку, вы соглашаетесь с политикой обработки данных.</small></form></div></section>
+    <footer><div class="shell footer-grid"><div><a class="brand footer-brand" href="/"><span>СВАР</span><b>КОД</b></a><p>Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.</p></div><div><h3>Разделы</h3>{nav.map(item => <a href={item.href}>{item.label}</a>)}</div><div><h3>Проект</h3><a href="/about/">О СВАРКОД</a><a href="/advertising/">Реклама</a><a href="https://forum.svarkod.ru">Форум</a><a href="mailto:editor@svarkod.ru">Редакция</a></div></div><div class="shell legal">© 2026 СВАРКОД <span>Материалы носят информационный характер</span></div></footer>
+  </body>
+</html>
