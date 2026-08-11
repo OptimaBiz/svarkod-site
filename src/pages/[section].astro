@@ -3,19 +3,17 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import { sections } from '../data/site';
+import { demoArticles } from '../demo-data';
 import { sortArticles, toArticleCard } from '../lib/content';
-
-export function getStaticPaths() {
-  return Object.keys(sections).map(section => ({ params: { section }, props: { section } }));
-}
-
-const { section } = Astro.props as { section: keyof typeof sections };
-const data = sections[section];
-const entries = sortArticles(await getCollection('articles', ({ data }) => !data.draft));
-const filtered = entries.filter(entry => section === 'news' ? ['Новости','Интервью'].includes(entry.data.section) : section === 'norms' ? entry.data.section === 'Нормы' : section === 'practice' ? entry.data.section === 'Практика' : section === 'technologies' ? entry.data.section === 'Технологии' : false);
-const pageArticles = filtered.map(toArticleCard);
+export function getStaticPaths(){return Object.keys(sections).map(section=>({params:{section},props:{section}}));}
+const { section }=Astro.props; const data=sections[section];
+const mapping={news:['Новости','Интервью'],norms:['Нормы'],practice:['Практика'],technologies:['Технологии']};
+const wanted=mapping[section]||[];
+const real=sortArticles(await getCollection('articles',({data})=>!data.draft)).filter(e=>wanted.includes(e.data.section)).map(e=>({...toArticleCard(e),demo:false}));
+const demo=demoArticles.filter(a=>wanted.includes(a.section)).map(a=>({...a,demo:true}));
+const items=demo.length?demo:real;
 ---
 <BaseLayout title={`${data.label} — СВАРКОД`} description={data.description}>
-  <header class="page-hero shell"><p class="eyebrow">{data.accent}</p><h1>{data.title}</h1><p>{data.description}</p></header>
-  {section === 'ratings' ? <section class="shell section-block"><div class="cards-grid"><article class="rank-card"><span>01</span><p>Первый контур</p><h2>Аттестационные центры</h2><p>Реальные позиции появятся после утверждения критериев и механизма верификации.</p><a class="button" href="/ratings/centers/">Статус рейтинга</a></article><article class="rank-card"><span>02</span><p>Следующие категории</p><h2>СРО и учебные центры</h2><p>Каждая категория получит отдельную методику и набор проверяемых источников.</p><a class="text-link" href="/ratings/methodology/">Общая методика →</a></article><article class="method-card"><p class="eyebrow">Непереговорные правила</p><h2>Реклама не покупает место</h2><ul><li>Критерии публикуются до расчёта</li><li>Один проверенный участник — один допустимый голос</li><li>Аномалии отделяются от результата</li><li>Пересмотры имеют публичную историю</li><li>Коммерческий профиль не меняет оценку</li></ul></article></div><div class="transparency-strip"><strong>Прозрачность рейтинга</strong><span>Методика</span><span>Источники</span><span>Верификация</span><span>Аномалии</span><span>Журнал пересмотров</span></div></section> : section === 'services' ? <section class="shell section-block"><div class="cards-grid"><article class="service-card"><span>01</span><h2>Нормативная навигация</h2><p>Поможем собрать карту источников и вопросов для дальнейшей профильной проверки.</p><a href="/services/request/">Оставить заявку →</a></article><article class="service-card"><span>02</span><h2>Экспертный контент</h2><p>Технический материал, интервью, отраслевой обзор или исследовательский формат.</p><a href="/services/request/">Обсудить материал →</a></article><article class="service-card"><span>03</span><h2>B2B-проекты</h2><p>Whitepaper, webinar, спецпроект и профиль организации с явной маркировкой коммерческого участия.</p><a href="/advertising/">Коммерческие форматы →</a></article></div></section> : <section class="shell section-block"><div class="article-grid">{pageArticles.length ? pageArticles.map((article, i) => <ArticleCard article={article} large={i === 0} />) : <div class="empty-state wide"><span>Редакционный контур готов</span><h2>Материалы этого раздела ещё проходят подготовку</h2><p>СВАРКОД не публикует демонстрационные новости как реальные отраслевые факты. Раздел уже включён в навигацию и общий поиск.</p></div>}</div></section>}
+<header class="section-hero shell"><span class="kicker">{data.accent}</span><h1>{data.label}</h1><p>{data.description}</p></header>
+{['news','norms','practice','technologies'].includes(section)?<section class="shell section-feed">{items.length?<><div class="section-feature">{items[0]&&<ArticleCard article={items[0]} lead/>}<div>{items.slice(1,3).map(a=><ArticleCard article={a} compact/>)}</div></div><div class="section-list">{items.slice(3).map(a=><ArticleCard article={a}/>)}</div></>:<div class="clean-empty"><span>Раздел готов</span><h2>Здесь пока нет опубликованных материалов</h2><p>Оболочка, маршруты и поиск сохранены. Добавьте редакционный контент — и он появится автоматически.</p></div>}</section>:<section class="shell clean-empty"><span>{data.label}</span><h2>Раздел использует отдельный интерфейс</h2><p>Перейдите через основную навигацию.</p></section>}
 </BaseLayout>
