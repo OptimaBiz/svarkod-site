@@ -13,7 +13,7 @@ const searchItems = [
   ...events.map(entry => ({ title: entry.data.title, description: entry.data.description, url: `/events/${entry.id}/`, kind: 'События', type: entry.data.category, keywords: `${entry.data.organizer} ${entry.data.location} ${entry.data.tags.join(' ')}` })),
   { title: 'Новости', description: 'События отрасли и редакционные обзоры.', url: '/news/', kind: 'Разделы', type: 'Раздел', keywords: 'новости события' },
   { title: 'Нормы', description: 'Нормативные изменения и редакционные разъяснения.', url: '/norms/', kind: 'Разделы', type: 'Раздел', keywords: 'нормы требования ОПО' },
-  { title: 'Практика', description: 'Контроль, качество и практические материалы.', url: '/practice/', kind: 'Разделы', type: 'Раздел', keywords: 'практика технологии контроль' },
+  { title: 'Практика', description: 'Контроль, качество и практические материалы.', url: '/practice/', kind: 'Разделы', type: 'Раздел', keywords: 'практика контроль' },
   { title: 'Технологии', description: 'Оборудование, процессы и автоматизация.', url: '/technologies/', kind: 'Разделы', type: 'Раздел', keywords: 'технологии сварка оборудование автоматизация' },
   { title: 'Документы', description: 'Каталог редакционных карточек документов.', url: '/documents/', kind: 'Разделы', type: 'Раздел', keywords: 'документы стандарты первоисточник' },
   { title: 'Организации', description: 'Проверяемый отраслевой справочник.', url: '/organizations/', kind: 'Разделы', type: 'Раздел', keywords: 'организации СРО центры лаборатории поставщики' },
@@ -27,31 +27,27 @@ const encodedIndex = JSON.stringify(searchItems).replace(/</g, '\\u003c');
   <section class="shell search-workspace"><aside class="search-filters"><strong>Тип результата</strong><button type="button" data-kind="" class="active">Все <span id="count-all">0</span></button><button type="button" data-kind="Материалы">Материалы <span id="count-articles">0</span></button><button type="button" data-kind="Документы">Документы <span id="count-documents">0</span></button><button type="button" data-kind="Организации">Организации <span id="count-organizations">0</span></button><button type="button" data-kind="События">События <span id="count-events">0</span></button></aside><div><div class="search-summary" id="search-summary">Введите запрос, чтобы найти данные.</div><div id="search-results" class="search-results"></div><noscript><p>Для локального поиска требуется JavaScript.</p></noscript></div></section>
   <script type="application/json" id="search-index" set:html={encodedIndex}></script>
   <script>
-    const form = document.querySelector('#site-search');
-    const input = document.querySelector('#q');
-    const results = document.querySelector('#search-results');
-    const summary = document.querySelector('#search-summary');
-    const indexNode = document.querySelector('#search-index');
-    const filterButtons = [...document.querySelectorAll('[data-kind]')];
-    const index = indexNode ? JSON.parse(indexNode.textContent || '[]') : [];
+    type SearchItem = { title: string; description: string; url: string; kind: string; type: string; keywords: string };
+    const form = document.querySelector<HTMLFormElement>('#site-search');
+    const input = document.querySelector<HTMLInputElement>('#q');
+    const results = document.querySelector<HTMLElement>('#search-results');
+    const summary = document.querySelector<HTMLElement>('#search-summary');
+    const indexNode = document.querySelector<HTMLElement>('#search-index');
+    const filterButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-kind]')];
+    const index: SearchItem[] = indexNode ? JSON.parse(indexNode.textContent || '[]') : [];
     let activeKind = '';
-    const normalize = (value) => String(value || '').toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
-    function matchingItems(rawQuery) {
-      const query = normalize(rawQuery);
-      if (!query) return [];
+    const normalize = (value: unknown) => String(value || '').toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
+    function matchingItems(rawQuery: string) {
+      const query = normalize(rawQuery); if (!query) return [];
       const terms = query.split(/\s+/).filter(Boolean);
-      return index.filter((item) => {
-        const haystack = normalize(`${item.title} ${item.description} ${item.kind} ${item.type} ${item.keywords}`);
-        return terms.every(term => haystack.includes(term));
-      });
+      return index.filter((item) => { const haystack = normalize(`${item.title} ${item.description} ${item.kind} ${item.type} ${item.keywords}`); return terms.every(term => haystack.includes(term)); });
     }
-    function setCount(id, value) { const node = document.querySelector(id); if (node) node.textContent = String(value); }
-    function renderResults(rawQuery) {
+    function setCount(id: string, value: number) { const node = document.querySelector<HTMLElement>(id); if (node) node.textContent = String(value); }
+    function renderResults(rawQuery: string) {
       if (!results || !input || !summary) return;
-      input.value = rawQuery;
-      results.replaceChildren();
+      input.value = rawQuery; results.replaceChildren();
       const allMatches = matchingItems(rawQuery);
-      const counts = allMatches.reduce((acc, item) => ({ ...acc, [item.kind]: (acc[item.kind] || 0) + 1 }), {});
+      const counts = allMatches.reduce<Record<string, number>>((acc, item) => { acc[item.kind] = (acc[item.kind] || 0) + 1; return acc; }, {});
       setCount('#count-all', allMatches.length); setCount('#count-articles', counts['Материалы'] || 0); setCount('#count-documents', counts['Документы'] || 0); setCount('#count-organizations', counts['Организации'] || 0); setCount('#count-events', counts['События'] || 0);
       if (!normalize(rawQuery)) { summary.textContent = 'Введите запрос, чтобы найти данные.'; return; }
       const matches = activeKind ? allMatches.filter(item => item.kind === activeKind) : allMatches;
@@ -59,8 +55,7 @@ const encodedIndex = JSON.stringify(searchItems).replace(/</g, '\\u003c');
       matches.slice(0, 50).forEach((item) => {
         const article = document.createElement('article'); article.className = 'search-result';
         const meta = document.createElement('div'); meta.className = 'meta';
-        const kind = document.createElement('span'); kind.textContent = item.kind;
-        const type = document.createElement('span'); type.textContent = item.type; meta.append(kind, type);
+        const kind = document.createElement('span'); kind.textContent = item.kind; const type = document.createElement('span'); type.textContent = item.type; meta.append(kind, type);
         const heading = document.createElement('h2'); const link = document.createElement('a'); link.href = item.url; link.textContent = item.title; heading.append(link);
         const description = document.createElement('p'); description.textContent = item.description;
         const arrow = document.createElement('a'); arrow.href = item.url; arrow.className = 'text-link'; arrow.textContent = 'Открыть →';
@@ -68,8 +63,7 @@ const encodedIndex = JSON.stringify(searchItems).replace(/</g, '\\u003c');
       });
     }
     filterButtons.forEach((button) => button.addEventListener('click', () => { activeKind = button.dataset.kind || ''; filterButtons.forEach(item => item.classList.toggle('active', item === button)); renderResults(input?.value || ''); }));
-    const initial = new URLSearchParams(window.location.search).get('q') || '';
-    renderResults(initial);
+    const initial = new URLSearchParams(window.location.search).get('q') || ''; renderResults(initial);
     form?.addEventListener('submit', (event) => { event.preventDefault(); const query = input?.value || ''; const url = new URL(window.location.href); query ? url.searchParams.set('q', query) : url.searchParams.delete('q'); history.replaceState({}, '', url); renderResults(query); });
   </script>
 </BaseLayout>
