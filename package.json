@@ -1,11 +1,12 @@
 {
   "name": "svarkod",
   "type": "module",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "demo:clean": "node scripts/clean-demo.mjs"
   },
   "dependencies": {
     "astro": "^5.13.5"
