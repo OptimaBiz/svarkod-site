@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const organizations = await getCollection('organizations', ({ data }) => !data.draft);
+  return organizations.map(organization => ({ params: { id: organization.id }, props: { organization } }));
+}
+
+const { organization } = Astro.props;
+const { Content, headings } = await render(organization);
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: organization.data.name,
+  description: organization.data.description,
+  url: organization.data.website,
+  address: organization.data.city ? { '@type': 'PostalAddress', addressLocality: organization.data.city, addressRegion: organization.data.region, addressCountry: 'RU' } : undefined,
+};
+---
+<BaseLayout title={`${organization.data.name} — Организации — СВАРКОД`} description={organization.data.description} pageStructuredData={schema}>
+  <article class="entity-page"><header class="entity-hero shell"><div class="entity-kicker"><span>{organization.data.type}</span><span class:list={['verification', { verified: organization.data.verification === 'Проверено редакцией' }]}>{organization.data.verification}</span></div><h1>{organization.data.name}</h1><p>{organization.data.description}</p><div class="entity-facts"><div><span>Регион</span><strong>{organization.data.city ? `${organization.data.city}, ` : ''}{organization.data.region}</strong></div><div><span>Последняя проверка</span><strong>{organization.data.verifiedAt ? formatDate(organization.data.verifiedAt) : 'Не зафиксирована'}</strong></div><div><span>Рейтинг</span><strong>Не влияет на коммерческий профиль</strong></div></div>{organization.data.website && <a class="button" rel="nofollow noopener" target="_blank" href={organization.data.website}>Официальный сайт ↗</a>}</header><div class="article-content shell"><aside><strong>Профиль</strong>{headings.filter(({ depth }) => depth === 2).map(heading => <a href={`#${heading.slug}`}>{heading.text}</a>)}</aside><div><Content /><div class="note"><strong>Редакционная проверка</strong><p>Карточка описывает организацию по проверяемым источникам. Наличие коммерческого размещения не меняет редакционный статус, факты или рейтинговый результат.</p></div></div></div></article>
+</BaseLayout>

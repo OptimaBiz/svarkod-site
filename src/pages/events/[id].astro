@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events', ({ data }) => !data.draft);
+  return events.map(event => ({ params: { id: event.id }, props: { event } }));
+}
+
+const { event } = Astro.props;
+const { Content, headings } = await render(event);
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: event.data.title,
+  description: event.data.description,
+  startDate: event.data.startsAt.toISOString(),
+  endDate: event.data.endsAt?.toISOString(),
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: { '@type': 'Place', name: event.data.location },
+  organizer: { '@type': 'Organization', name: event.data.organizer },
+  url: event.data.externalUrl,
+};
+---
+<BaseLayout title={`${event.data.title} — События — СВАРКОД`} description={event.data.description} pageStructuredData={schema}>
+  <article class="entity-page"><header class="entity-hero shell"><div class="entity-kicker"><span>{event.data.category}</span><span class:list={['verification', { verified: event.data.verification === 'Проверено редакцией' }]}>{event.data.verification}</span></div><h1>{event.data.title}</h1><p>{event.data.description}</p><div class="entity-facts"><div><span>Дата</span><strong>{formatDate(event.data.startsAt)}</strong></div><div><span>Место</span><strong>{event.data.location}</strong></div><div><span>Организатор</span><strong>{event.data.organizer}</strong></div></div>{event.data.externalUrl && <a class="button" rel="nofollow noopener" target="_blank" href={event.data.externalUrl}>Источник события ↗</a>}</header><div class="article-content shell"><aside><strong>Событие</strong>{headings.filter(({ depth }) => depth === 2).map(heading => <a href={`#${heading.slug}`}>{heading.text}</a>)}</aside><div><Content /><div class="note"><strong>Проверка СВАРКОД</strong><p>Перед поездкой или регистрацией сверяйте программу, время и условия на официальной странице организатора: параметры события могут измениться после редакционной проверки.</p></div></div></div></article>
+</BaseLayout>
