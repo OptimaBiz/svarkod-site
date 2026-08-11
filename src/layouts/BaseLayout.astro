@@ -1,8 +1,29 @@
 ---
 import '../styles/global.css';
 import { nav } from '../data/site';
-const { title = 'СВАРКОД — Код сварочной отрасли', description = 'Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.' } = Astro.props;
+
+const {
+  title = 'СВАРКОД — Код сварочной отрасли',
+  description = 'Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.',
+  noindex = false,
+  ogType = 'website',
+} = Astro.props;
+
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const formsEndpoint = import.meta.env.PUBLIC_FORMS_ENDPOINT?.trim() || '';
+const formsEnabled = Boolean(formsEndpoint);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'СВАРКОД',
+  url: 'https://svarkod.ru/',
+  inLanguage: 'ru',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://svarkod.ru/search/?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 <!doctype html>
 <html lang="ru">
@@ -10,11 +31,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="СВАРКОД" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
   </head>
   <body>
@@ -28,7 +54,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <nav class="main-nav" aria-label="Основная навигация"><div class="shell nav-inner">{nav.map(item => <a class={Astro.url.pathname.startsWith(item.href) ? 'active' : ''} href={item.href}>{item.label}</a>)}<a class="forum" href="https://forum.svarkod.ru">Форум ↗</a></div></nav>
     </header>
     <main id="content"><slot /></main>
-    <section class="subscribe" id="subscribe"><div class="shell subscribe-grid"><div><p class="eyebrow light">Рассылка СВАРКОД</p><h2>Главное для сварочной отрасли — без информационного шума</h2><p>Новые нормы, практические разборы и важные события. Один раз в неделю.</p></div><form action="#" method="post"><label class="sr-only" for="email">Рабочая почта</label><input id="email" type="email" placeholder="Рабочая почта" required /><button class="button light-button">Подписаться</button><small>Нажимая кнопку, вы соглашаетесь с политикой обработки данных.</small></form></div></section>
-    <footer><div class="shell footer-grid"><div><a class="brand footer-brand" href="/"><span>СВАР</span><b>КОД</b></a><p>Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.</p></div><div><h3>Разделы</h3>{nav.map(item => <a href={item.href}>{item.label}</a>)}</div><div><h3>Проект</h3><a href="/about/">О СВАРКОД</a><a href="/advertising/">Реклама</a><a href="https://forum.svarkod.ru">Форум</a><a href="mailto:editor@svarkod.ru">Редакция</a></div></div><div class="shell legal">© 2026 СВАРКОД <span>Материалы носят информационный характер</span></div></footer>
+    <section class="subscribe" id="subscribe">
+      <div class="shell subscribe-grid">
+        <div><p class="eyebrow light">Рассылка СВАРКОД</p><h2>Главное для сварочной отрасли — без информационного шума</h2><p>Новые нормы, практические разборы и важные события. Один раз в неделю.</p></div>
+        <form action={formsEnabled ? formsEndpoint : undefined} method="post">
+          <input type="hidden" name="form_type" value="newsletter" />
+          <label class="sr-only" for="email">Рабочая почта</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="Рабочая почта" required disabled={!formsEnabled} />
+          <button class="button light-button" type="submit" disabled={!formsEnabled}>Подписаться</button>
+          <small>{formsEnabled ? <label><input type="checkbox" name="consent" value="yes" required /> Согласен с <a href="/privacy/">условиями обработки данных</a>.</label> : <>Подписка пока отключена: внешний защищённый обработчик форм не настроен.</>}</small>
+        </form>
+      </div>
+    </section>
+    <footer>
+      <div class="shell footer-grid">
+        <div><a class="brand footer-brand" href="/"><span>СВАР</span><b>КОД</b></a><p>Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.</p></div>
+        <div><h3>Разделы</h3>{nav.map(item => <a href={item.href}>{item.label}</a>)}</div>
+        <div><h3>Проект</h3><a href="/about/">О СВАРКОД</a><a href="/advertising/">Реклама</a><a href="/privacy/">Обработка данных</a><a href="https://forum.svarkod.ru">Форум</a><a href="mailto:editor@svarkod.ru">Редакция</a></div>
+      </div>
+      <div class="shell legal">© 2026 СВАРКОД <span>Материалы носят информационный характер</span></div>
+    </footer>
   </body>
 </html>

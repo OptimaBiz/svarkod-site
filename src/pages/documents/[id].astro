@@ -1,0 +1,19 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const documents = await getCollection('documents', ({ data }) => !data.draft);
+  return documents.map(document => ({ params: { id: document.id }, props: { document } }));
+}
+
+const { document } = Astro.props;
+const { Content, headings } = await render(document);
+---
+<BaseLayout title={`${document.data.title} — СВАРКОД`} description={document.data.description}>
+  <article class="article-page">
+    <header class="article-header shell"><div class="meta"><span>{document.data.status}</span><span>{document.data.category}</span><time datetime={document.data.updatedAt.toISOString()}>Проверено {formatDate(document.data.updatedAt)}</time></div><h1>{document.data.title}</h1><p>{document.data.description}</p></header>
+    <div class="article-content shell"><aside><strong>Разделы</strong>{headings.filter(({ depth }) => depth === 2).map(heading => <a href={`#${heading.slug}`}>{heading.text}</a>)}</aside><div><Content /><div class="note"><strong>Статус карточки</strong><p>Материал СВАРКОД является навигацией и редакционным пояснением. Официальный источник имеет приоритет.</p></div></div></div>
+  </article>
+</BaseLayout>

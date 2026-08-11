@@ -1,5 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-const centers = [{name:'Аттестационный центр «Прометей»',city:'Москва',score:'4,82',votes:184},{name:'Центр сварочных технологий',city:'Екатеринбург',score:'4,76',votes:152},{name:'Регион-АЦ',city:'Казань',score:'4,68',votes:119}];
 ---
-<BaseLayout title="Рейтинг аттестационных центров — СВАРКОД"><header class="page-hero shell"><p class="eyebrow">Рейтинг 2026</p><h1>Аттестационные центры</h1><p>Демонстрация структуры рейтинга. Позиции и организации на этой странице вымышлены и не являются редакционной оценкой.</p></header><section class="shell ranking"><div class="ranking-head"><span>Место и организация</span><span>Оценка</span></div>{centers.map((center,i)=><article><strong class="place">{String(i+1).padStart(2,'0')}</strong><div><h2>{center.name}</h2><p>{center.city} · {center.votes} подтверждённых голосов</p></div><strong class="rating-score">{center.score}<small>/ 5</small></strong></article>)}<div class="note"><strong>Прозрачность</strong><p>После запуска здесь будут опубликованы методика, правила верификации и журнал пересмотров результатов.</p></div></section></BaseLayout>
+<BaseLayout title="Рейтинг аттестационных центров — СВАРКОД" description="Статус подготовки рейтинга аттестационных центров СВАРКОД.">
+  <header class="page-hero shell"><p class="eyebrow">Подготовка к запуску</p><h1>Аттестационные центры</h1><p>Реальные организации, оценки и места не публикуются до утверждения методики и запуска проверяемого механизма голосования.</p></header>
+  <section class="shell ranking">
+    <div class="note"><strong>Что уже определено</strong><p>Реклама не должна влиять на место; правила публикуются до голосования; аномальные голоса проверяются; изменения результатов должны быть прослеживаемыми.</p></div>
+    <article><strong class="place">01</strong><div><h2>Методика оценки</h2><p>Нужно утвердить критерии, веса, источники данных и правила обработки спорных случаев.</p></div><strong class="rating-score">до запуска</strong></article>
+    <article><strong class="place">02</strong><div><h2>Верификация участников</h2><p>Нужен отдельный сервис, который не хранит лишние персональные данные и ограничивает повторные голоса.</p></div><strong class="rating-score">до запуска</strong></article>
+    <article><strong class="place">03</strong><div><h2>Журнал пересмотров</h2><p>Изменения методики и результатов должны иметь дату, причину и понятную публичную историю.</p></div><strong class="rating-score">до запуска</strong></article>
+  </section>
+</BaseLayout>

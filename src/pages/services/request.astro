@@ -1,4 +1,20 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+const formsEndpoint = import.meta.env.PUBLIC_FORMS_ENDPOINT?.trim() || '';
+const formsEnabled = Boolean(formsEndpoint);
 ---
-<BaseLayout title="Оставить заявку — СВАРКОД"><header class="page-hero shell"><p class="eyebrow">Услуги</p><h1>Обсудить задачу</h1><p>Коротко опишите ситуацию. Мы уточним детали и скажем, можем ли помочь.</p></header><section class="shell form-wrap"><form class="request-form"><label>Имя<input required name="name" /></label><label>Рабочая почта<input required type="email" name="email" /></label><label>Компания<input name="company" /></label><label>Задача<textarea required rows="6" name="message"></textarea></label><button class="button">Отправить заявку</button><small>Форма будет подключена к отдельному защищённому контуру обработки заявок.</small></form></section></BaseLayout>
+<BaseLayout title="Оставить заявку — СВАРКОД" noindex={true}>
+  <header class="page-hero shell"><p class="eyebrow">Услуги</p><h1>Обсудить задачу</h1><p>Коротко опишите ситуацию. Мы уточним детали и скажем, можем ли помочь.</p></header>
+  <section class="shell form-wrap">
+    <form class="request-form" action={formsEnabled ? formsEndpoint : undefined} method="post">
+      <input type="hidden" name="form_type" value="service_request" />
+      <label>Имя<input required name="name" autocomplete="name" disabled={!formsEnabled} /></label>
+      <label>Рабочая почта<input required type="email" name="email" autocomplete="email" disabled={!formsEnabled} /></label>
+      <label>Компания<input name="company" autocomplete="organization" disabled={!formsEnabled} /></label>
+      <label>Задача<textarea required rows="6" name="message" disabled={!formsEnabled}></textarea></label>
+      <label><input type="checkbox" name="consent" value="yes" required disabled={!formsEnabled} /> Согласен с <a href="/privacy/">условиями обработки данных</a>.</label>
+      <button class="button" type="submit" disabled={!formsEnabled}>Отправить заявку</button>
+      <small>{formsEnabled ? 'Данные передаются во внешний контур обработки форм, настроенный для этого сайта.' : 'Отправка отключена до подключения отдельного защищённого контура обработки заявок.'}</small>
+    </form>
+  </section>
+</BaseLayout>

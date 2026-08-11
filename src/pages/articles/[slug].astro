@@ -1,10 +1,20 @@
 ---
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { articles } from '../../data/site';
-export function getStaticPaths() { return articles.map(article => ({ params: { slug: article.slug }, props: { article } })); }
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map(article => ({ params: { slug: article.id }, props: { article } }));
+}
+
 const { article } = Astro.props;
+const { Content, headings } = await render(article);
 ---
-<BaseLayout title={`${article.title} — СВАРКОД`} description={article.lead}>
-  <article class="article-page"><header class="article-header shell"><div class="meta"><span>{article.section}</span><time>{article.date}</time><span>{article.read}</span></div><h1>{article.title}</h1><p>{article.lead}</p></header><div class="article-cover"><div class="shell"><span>СВАРКОД / РАЗБОР</span></div></div><div class="article-content shell"><aside><strong>В материале</strong><a href="#context">Контекст</a><a href="#changes">Что меняется</a><a href="#actions">Что делать</a></aside><div><p class="intro">Требования к сварочным работам на опасных производственных объектах формируют не один документ и не одно ведомство. Поэтому важно видеть систему целиком: от области применения нормы до подтверждающих документов на конкретном производстве.</p><h2 id="context">Контекст</h2><p>В этом демонстрационном материале показана структура редакционного разбора СВАРКОД. Перед публикацией фактические положения и ссылки на документы проходят экспертную и юридическую проверку.</p><blockquote>Задача редакции — не пересказать документ, а показать специалисту, где именно требование меняет его ежедневную работу.</blockquote><h2 id="changes">Что меняется</h2><p>Каждое изменение разбирается по четырём вопросам: кого оно касается, когда начинает действовать, какие процессы затрагивает и чем подтверждается выполнение.</p><h2 id="actions">Что проверить организации</h2><ol><li>Определить применимость требований к объектам и видам работ.</li><li>Сверить локальные процедуры с актуальными редакциями документов.</li><li>Назначить ответственных и сохранить подтверждение выполненных действий.</li></ol><div class="note"><strong>Редакционная пометка</strong><p>Это пример страницы. Он не является нормативным разъяснением и не заменяет анализ действующих требований.</p></div></div></div>
+<BaseLayout title={`${article.data.title} — СВАРКОД`} description={article.data.lead} ogType="article">
+  <article class="article-page">
+    <header class="article-header shell"><div class="meta"><span>{article.data.section}</span><time datetime={article.data.publishedAt.toISOString()}>{formatDate(article.data.publishedAt)}</time><span>{article.data.readMinutes} мин</span></div><h1>{article.data.title}</h1><p>{article.data.lead}</p></header>
+    <div class="article-cover"><div class="shell"><span>СВАРКОД / {article.data.section.toUpperCase()}</span></div></div>
+    <div class="article-content shell"><aside><strong>В материале</strong>{headings.filter(({ depth }) => depth === 2).map(heading => <a href={`#${heading.slug}`}>{heading.text}</a>)}</aside><div><Content /><div class="note"><strong>Редакционный статус</strong><p>Материал носит информационный характер. Для нормативных решений проверяйте официальный первоисточник, область применения и актуальную редакцию.</p></div></div></div>
   </article>
 </BaseLayout>

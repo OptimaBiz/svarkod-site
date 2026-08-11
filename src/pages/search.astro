@@ -1,4 +1,73 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const articles = await getCollection('articles', ({ data }) => !data.draft);
+const documents = await getCollection('documents', ({ data }) => !data.draft);
+const searchItems = [
+  ...articles.map(entry => ({ title: entry.data.title, description: entry.data.lead, url: `/articles/${entry.id}/`, type: entry.data.section, keywords: entry.data.tags.join(' ') })),
+  ...documents.map(entry => ({ title: entry.data.title, description: entry.data.description, url: `/documents/${entry.id}/`, type: 'Документы', keywords: `${entry.data.category} ${entry.data.tags.join(' ')}` })),
+  { title: 'Новости', description: 'События отрасли и редакционные обзоры.', url: '/news/', type: 'Раздел', keywords: 'новости события' },
+  { title: 'Нормы', description: 'Нормативные изменения и редакционные разъяснения.', url: '/norms/', type: 'Раздел', keywords: 'нормы требования ОПО' },
+  { title: 'Практика', description: 'Технологии, контроль и практические материалы.', url: '/practice/', type: 'Раздел', keywords: 'практика технологии контроль' },
+  { title: 'Услуги', description: 'Экспертная поддержка и отраслевой контент.', url: '/services/', type: 'Раздел', keywords: 'услуги консультация контент' },
+  { title: 'Рейтинги', description: 'Принципы и статус запуска отраслевых рейтингов.', url: '/ratings/', type: 'Раздел', keywords: 'рейтинги методика верификация' },
+];
+const encodedIndex = JSON.stringify(searchItems).replace(/</g, '\\u003c');
 ---
-<BaseLayout title="Поиск — СВАРКОД"><header class="page-hero shell"><p class="eyebrow">По всей системе</p><h1>Поиск</h1><form class="search-form"><label class="sr-only" for="q">Поисковый запрос</label><input id="q" name="q" type="search" placeholder="Документ, тема, организация…" autofocus/><button class="button">Найти</button></form><p class="search-hint">Ищите по материалам редакции, нормативным документам, рейтингу и форуму.</p></header></BaseLayout>
+<BaseLayout title="Поиск — СВАРКОД" description="Поиск по редакционным материалам и каталогу документов СВАРКОД." noindex={true}>
+  <header class="page-hero shell"><p class="eyebrow">По материалам СВАРКОД</p><h1>Поиск</h1><form id="site-search" class="search-form" action="/search/" method="get"><label class="sr-only" for="q">Поисковый запрос</label><input id="q" name="q" type="search" placeholder="Документ, тема, организация…" autocomplete="off"/><button class="button" type="submit">Найти</button></form><p class="search-hint">Поиск работает локально по опубликованным материалам и карточкам документов. Форум индексируется отдельно.</p></header>
+  <section class="shell section-block" aria-live="polite"><div id="search-results"><p>Введите запрос, чтобы найти материалы.</p></div><noscript><p>Для локального поиска требуется JavaScript.</p></noscript></section>
+  <script type="application/json" id="search-index" set:html={encodedIndex}></script>
+  <script>
+    const form = document.querySelector('#site-search');
+    const input = document.querySelector('#q');
+    const results = document.querySelector('#search-results');
+    const indexNode = document.querySelector('#search-index');
+    const index = indexNode ? JSON.parse(indexNode.textContent || '[]') : [];
+    const normalize = (value) => value.toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
+    function renderResults(rawQuery) {
+      if (!results || !input) return;
+      const query = normalize(rawQuery);
+      input.value = rawQuery;
+      results.replaceChildren();
+      if (!query) { results.textContent = 'Введите запрос, чтобы найти материалы.'; return; }
+      const terms = query.split(/\s+/).filter(Boolean);
+      const matches = index.filter((item) => {
+        const haystack = normalize(`${item.title} ${item.description} ${item.type} ${item.keywords}`);
+        return terms.every(term => haystack.includes(term));
+      }).slice(0, 30);
+      const summary = document.createElement('p');
+      summary.textContent = matches.length ? `Найдено: ${matches.length}` : 'Ничего не найдено.';
+      results.append(summary);
+      matches.forEach((item) => {
+        const article = document.createElement('article');
+        article.className = 'service-card';
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const type = document.createElement('span');
+        type.textContent = item.type;
+        meta.append(type);
+        const heading = document.createElement('h2');
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.textContent = item.title;
+        heading.append(link);
+        const description = document.createElement('p');
+        description.textContent = item.description;
+        article.append(meta, heading, description);
+        results.append(article);
+      });
+    }
+    const initial = new URLSearchParams(window.location.search).get('q') || '';
+    renderResults(initial);
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const query = input?.value || '';
+      const url = new URL(window.location.href);
+      query ? url.searchParams.set('q', query) : url.searchParams.delete('q');
+      history.replaceState({}, '', url);
+      renderResults(query);
+    });
+  </script>
+</BaseLayout>
