@@ -1,21 +1,23 @@
 ---
 import '../styles/global.css';
-import { nav } from '../data/site';
+import { nav, utilityNav } from '../data/site';
 
 const {
   title = 'СВАРКОД — Код сварочной отрасли',
-  description = 'Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.',
+  description = 'Отраслевое интернет-издание и рабочая система знаний о сварке, промышленной безопасности и нормативном регулировании.',
   noindex = false,
   ogType = 'website',
+  pageStructuredData = null,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const formsEndpoint = import.meta.env.PUBLIC_FORMS_ENDPOINT?.trim() || '';
 const formsEnabled = Boolean(formsEndpoint);
-const structuredData = {
+const websiteData = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'СВАРКОД',
+  alternateName: 'Код сварочной отрасли',
   url: 'https://svarkod.ru/',
   inLanguage: 'ru',
   potentialAction: {
@@ -24,6 +26,7 @@ const structuredData = {
     'query-input': 'required name=search_term_string',
   },
 };
+const structuredData = pageStructuredData ? [websiteData, pageStructuredData] : websiteData;
 ---
 <!doctype html>
 <html lang="ru">
@@ -33,6 +36,7 @@ const structuredData = {
     <meta name="description" content={description} />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="СВАРКОД" href="/feed.xml" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
@@ -46,33 +50,36 @@ const structuredData = {
   <body>
     <a class="skip" href="#content">К содержанию</a>
     <header class="site-header">
-      <div class="topline shell"><span>Независимое отраслевое издание</span><a href="/advertising/">Реклама и партнёрство</a></div>
+      <div class="utility-bar"><div class="shell utility-inner"><span>Отраслевое издание · база знаний · навигатор</span><div>{utilityNav.map(item => <a href={item.href}>{item.label}</a>)}</div></div></div>
       <div class="brandline shell">
         <a class="brand" href="/" aria-label="СВАРКОД — на главную"><span>СВАР</span><b>КОД</b><small>Код сварочной отрасли</small></a>
-        <div class="header-actions"><a class="search-link" href="/search/" aria-label="Поиск">⌕ <span>Поиск</span></a><a class="button button-small" href="#subscribe">Подписаться</a></div>
+        <form class="header-search" action="/search/" method="get"><label class="sr-only" for="header-q">Поиск</label><input id="header-q" name="q" type="search" placeholder="Норма, документ, организация, технология…"/><button type="submit">Найти</button></form>
+        <div class="header-actions"><a class="forum-chip" href="https://forum.svarkod.ru">Форум ↗</a><a class="button button-small" href="#subscribe">Подписаться</a></div>
       </div>
-      <nav class="main-nav" aria-label="Основная навигация"><div class="shell nav-inner">{nav.map(item => <a class={Astro.url.pathname.startsWith(item.href) ? 'active' : ''} href={item.href}>{item.label}</a>)}<a class="forum" href="https://forum.svarkod.ru">Форум ↗</a></div></nav>
+      <nav class="main-nav" aria-label="Основная навигация"><div class="shell nav-inner">{nav.map(item => <a aria-current={Astro.url.pathname.startsWith(item.href) ? 'page' : undefined} class={Astro.url.pathname.startsWith(item.href) ? 'active' : ''} href={item.href}>{item.label}</a>)}</div></nav>
     </header>
     <main id="content"><slot /></main>
     <section class="subscribe" id="subscribe">
       <div class="shell subscribe-grid">
-        <div><p class="eyebrow light">Рассылка СВАРКОД</p><h2>Главное для сварочной отрасли — без информационного шума</h2><p>Новые нормы, практические разборы и важные события. Один раз в неделю.</p></div>
+        <div><p class="eyebrow light">Рассылки СВАРКОД</p><h2>Нужное — по вашей роли, а не одной общей лентой</h2><p>Можно выбрать главный дайджест, нормативные изменения и практические материалы.</p></div>
         <form action={formsEnabled ? formsEndpoint : undefined} method="post">
           <input type="hidden" name="form_type" value="newsletter" />
           <label class="sr-only" for="email">Рабочая почта</label>
           <input id="email" name="email" type="email" autocomplete="email" placeholder="Рабочая почта" required disabled={!formsEnabled} />
           <button class="button light-button" type="submit" disabled={!formsEnabled}>Подписаться</button>
+          <fieldset class="newsletter-options" disabled={!formsEnabled}><legend class="sr-only">Выберите рассылки</legend><label><input type="checkbox" name="list" value="main" checked /> Главное</label><label><input type="checkbox" name="list" value="norms" /> Изменения норм</label><label><input type="checkbox" name="list" value="practice" /> Практика</label></fieldset>
           <small>{formsEnabled ? <label><input type="checkbox" name="consent" value="yes" required /> Согласен с <a href="/privacy/">условиями обработки данных</a>.</label> : <>Подписка пока отключена: внешний защищённый обработчик форм не настроен.</>}</small>
         </form>
       </div>
     </section>
     <footer>
       <div class="shell footer-grid">
-        <div><a class="brand footer-brand" href="/"><span>СВАР</span><b>КОД</b></a><p>Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.</p></div>
-        <div><h3>Разделы</h3>{nav.map(item => <a href={item.href}>{item.label}</a>)}</div>
-        <div><h3>Проект</h3><a href="/about/">О СВАРКОД</a><a href="/advertising/">Реклама</a><a href="/privacy/">Обработка данных</a><a href="https://forum.svarkod.ru">Форум</a><a href="mailto:editor@svarkod.ru">Редакция</a></div>
+        <div><a class="brand footer-brand" href="/"><span>СВАР</span><b>КОД</b></a><p>Отраслевое интернет-издание и рабочая система знаний о технологиях сварки, промышленной безопасности и нормативном регулировании.</p></div>
+        <div><h3>Система</h3>{nav.slice(0,4).map(item => <a href={item.href}>{item.label}</a>)}</div>
+        <div><h3>Навигатор</h3>{nav.slice(4).map(item => <a href={item.href}>{item.label}</a>)}</div>
+        <div><h3>Проект</h3>{utilityNav.map(item => <a href={item.href}>{item.label}</a>)}<a href="/privacy/">Обработка данных</a><a href="https://forum.svarkod.ru">Форум</a><a href="mailto:editor@svarkod.ru">Редакция</a></div>
       </div>
-      <div class="shell legal">© 2026 СВАРКОД <span>Материалы носят информационный характер</span></div>
+      <div class="shell legal">© 2026 СВАРКОД <span>Первоисточник и актуальная редакция документа имеют приоритет</span></div>
     </footer>
   </body>
 </html>

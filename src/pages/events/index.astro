@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { eventCategories } from '../../data/site';
+
+const events = (await getCollection('events', ({ data }) => !data.draft)).sort((a, b) => a.data.startsAt.getTime() - b.data.startsAt.getTime());
+---
+<BaseLayout title="События — СВАРКОД" description="Отраслевой календарь: выставки, конференции, вебинары, обучение и проверенные нормативные даты.">
+  <header class="page-hero shell"><p class="eyebrow">Отраслевой и нормативный календарь</p><h1>События</h1><p>Календарь объединяет профессиональные мероприятия и даты, важные для применения требований. Каждая запись публикуется только после проверки источника.</p></header>
+  <section class="directory-tools shell events-tools"><label class="directory-search"><span>Поиск</span><input id="event-query" type="search" placeholder="Событие, организатор, тема…" /></label><label><span>Категория</span><select id="event-category"><option value="">Все категории</option>{eventCategories.map(category => <option value={category}>{category}</option>)}</select></label><div class="directory-count"><strong id="event-count">{events.length}</strong><span>событий</span></div></section>
+  <section class="shell section-block compact"><div class="event-list" id="event-results">{events.map(entry => <article class="event-card" data-event-card data-category={entry.data.category} data-search={`${entry.data.title} ${entry.data.description} ${entry.data.category} ${entry.data.organizer} ${entry.data.location} ${entry.data.tags.join(' ')}`}><time datetime={entry.data.startsAt.toISOString()}><strong>{String(entry.data.startsAt.getDate()).padStart(2,'0')}</strong><span>{entry.data.startsAt.toLocaleDateString('ru-RU', { month: 'short' })}<br/>{entry.data.startsAt.getFullYear()}</span></time><div><div class="entity-top"><span>{entry.data.category}</span><span class:list={['verification', { verified: entry.data.verification === 'Проверено редакцией' }]}>{entry.data.verification}</span></div><h2><a href={`/events/${entry.id}/`}>{entry.data.title}</a></h2><p>{entry.data.description}</p><div class="entity-meta"><span>{entry.data.location}</span><span>{entry.data.organizer}</span></div></div><a class="event-arrow" href={`/events/${entry.id}/`} aria-label={`Открыть: ${entry.data.title}`}>→</a></article>)}</div>{!events.length && <div class="empty-state directory-empty"><span>Календарь готов</span><h2>Проверенных публичных событий пока нет</h2><p>Не заполняем календарь вымышленными мероприятиями или непроверенными нормативными датами. Модель данных и фильтры уже работают.</p><a class="button" href="/documents/event-verification-method/">Методика проверки событий</a></div>}<div id="event-empty-filter" class="empty-state hidden"><span>Фильтр</span><h2>Совпадений нет</h2><p>Измените запрос или категорию.</p></div></section>
+  <section class="calendar-band"><div class="shell calendar-grid"><div><p class="eyebrow light">Нормативные даты</p><h2>Дата вступления требования в силу — тоже событие</h2><p>Когда каталог будет наполнен официальными источниками, нормативные карточки смогут автоматически связываться с календарём и редакционными разборами.</p></div><a class="button light-button" href="/norms/">Нормативные разборы</a></div></section>
+  <script>
+    const query = document.querySelector<HTMLInputElement>('#event-query');
+    const category = document.querySelector<HTMLSelectElement>('#event-category');
+    const cards = [...document.querySelectorAll<HTMLElement>('[data-event-card]')];
+    const count = document.querySelector<HTMLElement>('#event-count');
+    const empty = document.querySelector<HTMLElement>('#event-empty-filter');
+    const normalize = (value: unknown) => String(value || '').toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
+    function filterEvents() {
+      const q = normalize(query?.value);
+      const selectedCategory = category?.value || '';
+      let visible = 0;
+      cards.forEach((card) => {
+        const show = (!q || normalize(card.dataset.search).includes(q)) && (!selectedCategory || card.dataset.category === selectedCategory);
+        card.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (count) count.textContent = String(visible);
+      if (empty) empty.classList.toggle('hidden', visible !== 0 || cards.length === 0);
+    }
+    query?.addEventListener('input', filterEvents);
+    category?.addEventListener('change', filterEvents);
+  </script>
+</BaseLayout>

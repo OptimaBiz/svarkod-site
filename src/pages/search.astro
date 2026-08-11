@@ -4,70 +4,66 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const articles = await getCollection('articles', ({ data }) => !data.draft);
 const documents = await getCollection('documents', ({ data }) => !data.draft);
+const organizations = await getCollection('organizations', ({ data }) => !data.draft);
+const events = await getCollection('events', ({ data }) => !data.draft);
 const searchItems = [
-  ...articles.map(entry => ({ title: entry.data.title, description: entry.data.lead, url: `/articles/${entry.id}/`, type: entry.data.section, keywords: entry.data.tags.join(' ') })),
-  ...documents.map(entry => ({ title: entry.data.title, description: entry.data.description, url: `/documents/${entry.id}/`, type: 'Документы', keywords: `${entry.data.category} ${entry.data.tags.join(' ')}` })),
-  { title: 'Новости', description: 'События отрасли и редакционные обзоры.', url: '/news/', type: 'Раздел', keywords: 'новости события' },
-  { title: 'Нормы', description: 'Нормативные изменения и редакционные разъяснения.', url: '/norms/', type: 'Раздел', keywords: 'нормы требования ОПО' },
-  { title: 'Практика', description: 'Технологии, контроль и практические материалы.', url: '/practice/', type: 'Раздел', keywords: 'практика технологии контроль' },
-  { title: 'Услуги', description: 'Экспертная поддержка и отраслевой контент.', url: '/services/', type: 'Раздел', keywords: 'услуги консультация контент' },
-  { title: 'Рейтинги', description: 'Принципы и статус запуска отраслевых рейтингов.', url: '/ratings/', type: 'Раздел', keywords: 'рейтинги методика верификация' },
+  ...articles.map(entry => ({ title: entry.data.title, description: entry.data.lead, url: `/articles/${entry.id}/`, kind: 'Материалы', type: entry.data.section, keywords: entry.data.tags.join(' ') })),
+  ...documents.map(entry => ({ title: entry.data.title, description: entry.data.description, url: `/documents/${entry.id}/`, kind: 'Документы', type: entry.data.category, keywords: `${entry.data.status} ${entry.data.tags.join(' ')}` })),
+  ...organizations.map(entry => ({ title: entry.data.name, description: entry.data.description, url: `/organizations/${entry.id}/`, kind: 'Организации', type: entry.data.type, keywords: `${entry.data.region} ${entry.data.city ?? ''} ${entry.data.tags.join(' ')}` })),
+  ...events.map(entry => ({ title: entry.data.title, description: entry.data.description, url: `/events/${entry.id}/`, kind: 'События', type: entry.data.category, keywords: `${entry.data.organizer} ${entry.data.location} ${entry.data.tags.join(' ')}` })),
+  { title: 'Новости', description: 'События отрасли и редакционные обзоры.', url: '/news/', kind: 'Разделы', type: 'Раздел', keywords: 'новости события' },
+  { title: 'Нормы', description: 'Нормативные изменения и редакционные разъяснения.', url: '/norms/', kind: 'Разделы', type: 'Раздел', keywords: 'нормы требования ОПО' },
+  { title: 'Практика', description: 'Контроль, качество и практические материалы.', url: '/practice/', kind: 'Разделы', type: 'Раздел', keywords: 'практика контроль' },
+  { title: 'Технологии', description: 'Оборудование, процессы и автоматизация.', url: '/technologies/', kind: 'Разделы', type: 'Раздел', keywords: 'технологии сварка оборудование автоматизация' },
+  { title: 'Документы', description: 'Каталог редакционных карточек документов.', url: '/documents/', kind: 'Разделы', type: 'Раздел', keywords: 'документы стандарты первоисточник' },
+  { title: 'Организации', description: 'Проверяемый отраслевой справочник.', url: '/organizations/', kind: 'Разделы', type: 'Раздел', keywords: 'организации СРО центры лаборатории поставщики' },
+  { title: 'Рейтинги', description: 'Методика и статус отраслевых рейтингов.', url: '/ratings/', kind: 'Разделы', type: 'Раздел', keywords: 'рейтинги методика верификация' },
+  { title: 'События', description: 'Отраслевой и нормативный календарь.', url: '/events/', kind: 'Разделы', type: 'Раздел', keywords: 'события выставки конференции обучение даты' },
 ];
 const encodedIndex = JSON.stringify(searchItems).replace(/</g, '\\u003c');
 ---
-<BaseLayout title="Поиск — СВАРКОД" description="Поиск по редакционным материалам и каталогу документов СВАРКОД." noindex={true}>
-  <header class="page-hero shell"><p class="eyebrow">По материалам СВАРКОД</p><h1>Поиск</h1><form id="site-search" class="search-form" action="/search/" method="get"><label class="sr-only" for="q">Поисковый запрос</label><input id="q" name="q" type="search" placeholder="Документ, тема, организация…" autocomplete="off"/><button class="button" type="submit">Найти</button></form><p class="search-hint">Поиск работает локально по опубликованным материалам и карточкам документов. Форум индексируется отдельно.</p></header>
-  <section class="shell section-block" aria-live="polite"><div id="search-results"><p>Введите запрос, чтобы найти материалы.</p></div><noscript><p>Для локального поиска требуется JavaScript.</p></noscript></section>
+<BaseLayout title="Поиск — СВАРКОД" description="Единый поиск по материалам, документам, организациям и событиям СВАРКОД." noindex={true}>
+  <header class="page-hero shell search-hero"><p class="eyebrow">По всей системе</p><h1>Поиск</h1><form id="site-search" class="search-form search-form-v2" action="/search/" method="get"><label class="sr-only" for="q">Поисковый запрос</label><input id="q" name="q" type="search" placeholder="Норма, документ, организация, технология…" autocomplete="off" autofocus/><button class="button" type="submit">Найти</button></form><p class="search-hint">Один запрос одновременно проверяет редакционные материалы, документы, организации, события и основные разделы. Форум индексируется отдельно.</p></header>
+  <section class="shell search-workspace"><aside class="search-filters"><strong>Тип результата</strong><button type="button" data-kind="" class="active">Все <span id="count-all">0</span></button><button type="button" data-kind="Материалы">Материалы <span id="count-articles">0</span></button><button type="button" data-kind="Документы">Документы <span id="count-documents">0</span></button><button type="button" data-kind="Организации">Организации <span id="count-organizations">0</span></button><button type="button" data-kind="События">События <span id="count-events">0</span></button></aside><div><div class="search-summary" id="search-summary">Введите запрос, чтобы найти данные.</div><div id="search-results" class="search-results"></div><noscript><p>Для локального поиска требуется JavaScript.</p></noscript></div></section>
   <script type="application/json" id="search-index" set:html={encodedIndex}></script>
   <script>
-    const form = document.querySelector('#site-search');
-    const input = document.querySelector('#q');
-    const results = document.querySelector('#search-results');
-    const indexNode = document.querySelector('#search-index');
-    const index = indexNode ? JSON.parse(indexNode.textContent || '[]') : [];
-    const normalize = (value) => value.toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
-    function renderResults(rawQuery) {
-      if (!results || !input) return;
-      const query = normalize(rawQuery);
-      input.value = rawQuery;
-      results.replaceChildren();
-      if (!query) { results.textContent = 'Введите запрос, чтобы найти материалы.'; return; }
+    type SearchItem = { title: string; description: string; url: string; kind: string; type: string; keywords: string };
+    const form = document.querySelector<HTMLFormElement>('#site-search');
+    const input = document.querySelector<HTMLInputElement>('#q');
+    const results = document.querySelector<HTMLElement>('#search-results');
+    const summary = document.querySelector<HTMLElement>('#search-summary');
+    const indexNode = document.querySelector<HTMLElement>('#search-index');
+    const filterButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-kind]')];
+    const index: SearchItem[] = indexNode ? JSON.parse(indexNode.textContent || '[]') : [];
+    let activeKind = '';
+    const normalize = (value: unknown) => String(value || '').toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
+    function matchingItems(rawQuery: string) {
+      const query = normalize(rawQuery); if (!query) return [];
       const terms = query.split(/\s+/).filter(Boolean);
-      const matches = index.filter((item) => {
-        const haystack = normalize(`${item.title} ${item.description} ${item.type} ${item.keywords}`);
-        return terms.every(term => haystack.includes(term));
-      }).slice(0, 30);
-      const summary = document.createElement('p');
-      summary.textContent = matches.length ? `Найдено: ${matches.length}` : 'Ничего не найдено.';
-      results.append(summary);
-      matches.forEach((item) => {
-        const article = document.createElement('article');
-        article.className = 'service-card';
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        const type = document.createElement('span');
-        type.textContent = item.type;
-        meta.append(type);
-        const heading = document.createElement('h2');
-        const link = document.createElement('a');
-        link.href = item.url;
-        link.textContent = item.title;
-        heading.append(link);
-        const description = document.createElement('p');
-        description.textContent = item.description;
-        article.append(meta, heading, description);
-        results.append(article);
+      return index.filter((item) => { const haystack = normalize(`${item.title} ${item.description} ${item.kind} ${item.type} ${item.keywords}`); return terms.every(term => haystack.includes(term)); });
+    }
+    function setCount(id: string, value: number) { const node = document.querySelector<HTMLElement>(id); if (node) node.textContent = String(value); }
+    function renderResults(rawQuery: string) {
+      if (!results || !input || !summary) return;
+      input.value = rawQuery; results.replaceChildren();
+      const allMatches = matchingItems(rawQuery);
+      const counts = allMatches.reduce<Record<string, number>>((acc, item) => { acc[item.kind] = (acc[item.kind] || 0) + 1; return acc; }, {});
+      setCount('#count-all', allMatches.length); setCount('#count-articles', counts['Материалы'] || 0); setCount('#count-documents', counts['Документы'] || 0); setCount('#count-organizations', counts['Организации'] || 0); setCount('#count-events', counts['События'] || 0);
+      if (!normalize(rawQuery)) { summary.textContent = 'Введите запрос, чтобы найти данные.'; return; }
+      const matches = activeKind ? allMatches.filter(item => item.kind === activeKind) : allMatches;
+      summary.textContent = matches.length ? `Найдено: ${matches.length}` : 'По выбранному фильтру ничего не найдено.';
+      matches.slice(0, 50).forEach((item) => {
+        const article = document.createElement('article'); article.className = 'search-result';
+        const meta = document.createElement('div'); meta.className = 'meta';
+        const kind = document.createElement('span'); kind.textContent = item.kind; const type = document.createElement('span'); type.textContent = item.type; meta.append(kind, type);
+        const heading = document.createElement('h2'); const link = document.createElement('a'); link.href = item.url; link.textContent = item.title; heading.append(link);
+        const description = document.createElement('p'); description.textContent = item.description;
+        const arrow = document.createElement('a'); arrow.href = item.url; arrow.className = 'text-link'; arrow.textContent = 'Открыть →';
+        article.append(meta, heading, description, arrow); results.append(article);
       });
     }
-    const initial = new URLSearchParams(window.location.search).get('q') || '';
-    renderResults(initial);
-    form?.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const query = input?.value || '';
-      const url = new URL(window.location.href);
-      query ? url.searchParams.set('q', query) : url.searchParams.delete('q');
-      history.replaceState({}, '', url);
-      renderResults(query);
-    });
+    filterButtons.forEach((button) => button.addEventListener('click', () => { activeKind = button.dataset.kind || ''; filterButtons.forEach(item => item.classList.toggle('active', item === button)); renderResults(input?.value || ''); }));
+    const initial = new URLSearchParams(window.location.search).get('q') || ''; renderResults(initial);
+    form?.addEventListener('submit', (event) => { event.preventDefault(); const query = input?.value || ''; const url = new URL(window.location.href); query ? url.searchParams.set('q', query) : url.searchParams.delete('q'); history.replaceState({}, '', url); renderResults(query); });
   </script>
 </BaseLayout>
