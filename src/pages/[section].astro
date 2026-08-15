@@ -1,7 +1,7 @@
 ---
 import {getCollection} from 'astro:content'; import BaseLayout from '../layouts/BaseLayout.astro'; import ArticleCard from '../components/ArticleCard.astro'; import {sortArticles,toArticleCard} from '../lib/content';
 const legacy={news:{label:'Новости',description:'Редакционная лента новостей и интервью.',wanted:['Новости','Интервью'],canonical:'/edition/news/'},norms:{label:'Нормы',description:'Редакционные объяснения и аналитика регулирования.',wanted:['Объясняем','Аналитика'],canonical:'/requirements/'},technologies:{label:'Технологии',description:'Технологии, оборудование, автоматизация и производственная практика.',wanted:['Технологии','Практика'],canonical:'/practice/'}};
-export function getStaticPaths(){return Object.keys(legacy).map(section=>({params:{section},props:{section}}));}
+export function getStaticPaths(){const keys=['news','norms','technologies'];return keys.map(section=>({params:{section},props:{section}}));}
 const {section}=Astro.props; const data=legacy[section]; const items=sortArticles(await getCollection('articles',({data})=>!data.draft)).filter(x=>data.wanted.includes(x.data.section)).map(toArticleCard);
 ---
 <BaseLayout title={`${data.label} — СВАРКОД`} description={data.description}><header class="section-hero shell"><span class="kicker">СОВМЕСТИМЫЙ РАЗДЕЛ</span><h1>{data.label}</h1><p>{data.description} Новая каноническая структура: <a href={data.canonical}>{data.canonical}</a></p></header><section class="shell section-feed">{items.length?<div class="story-grid">{items.map(a=><ArticleCard article={a}/>)}</div>:<div class="clean-empty"><h2>Проверенных материалов пока нет</h2><p>Демо-публикации удалены из production.</p></div>}</section></BaseLayout>
