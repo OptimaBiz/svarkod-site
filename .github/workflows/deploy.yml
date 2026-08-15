@@ -28,6 +28,8 @@ jobs:
         run: npm install --global pnpm@10
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Validate production sources
+        run: pnpm validate
       - name: Configure GitHub Pages
         id: pages
         uses: actions/configure-pages@v5

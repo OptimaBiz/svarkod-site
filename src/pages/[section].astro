@@ -1,19 +1,7 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import ArticleCard from '../components/ArticleCard.astro';
-import { sections } from '../data/site';
-import { demoArticles } from '../demo-data';
-import { sortArticles, toArticleCard } from '../lib/content';
-export function getStaticPaths(){return Object.keys(sections).map(section=>({params:{section},props:{section}}));}
-const { section }=Astro.props; const data=sections[section];
-const mapping={news:['Новости','Интервью'],norms:['Нормы'],practice:['Практика'],technologies:['Технологии']};
-const wanted=mapping[section]||[];
-const real=sortArticles(await getCollection('articles',({data})=>!data.draft)).filter(e=>wanted.includes(e.data.section)).map(e=>({...toArticleCard(e),demo:false}));
-const demo=demoArticles.filter(a=>wanted.includes(a.section)).map(a=>({...a,demo:true}));
-const items=demo.length?demo:real;
+import {getCollection} from 'astro:content'; import BaseLayout from '../layouts/BaseLayout.astro'; import ArticleCard from '../components/ArticleCard.astro'; import {sortArticles,toArticleCard} from '../lib/content';
+const legacy={news:{label:'Новости',description:'Редакционная лента новостей и интервью.',wanted:['Новости','Интервью'],canonical:'/edition/news/'},norms:{label:'Нормы',description:'Редакционные объяснения и аналитика регулирования.',wanted:['Объясняем','Аналитика'],canonical:'/requirements/'},technologies:{label:'Технологии',description:'Технологии, оборудование, автоматизация и производственная практика.',wanted:['Технологии','Практика'],canonical:'/practice/'}};
+export function getStaticPaths(){return Object.keys(legacy).map(section=>({params:{section},props:{section}}));}
+const {section}=Astro.props; const data=legacy[section]; const items=sortArticles(await getCollection('articles',({data})=>!data.draft)).filter(x=>data.wanted.includes(x.data.section)).map(toArticleCard);
 ---
-<BaseLayout title={`${data.label} — СВАРКОД`} description={data.description}>
-<header class="section-hero shell"><span class="kicker">{data.accent}</span><h1>{data.label}</h1><p>{data.description}</p></header>
-{['news','norms','practice','technologies'].includes(section)?<section class="shell section-feed">{items.length?<><div class="section-feature">{items[0]&&<ArticleCard article={items[0]} lead/>}<div>{items.slice(1,3).map(a=><ArticleCard article={a} compact/>)}</div></div><div class="section-list">{items.slice(3).map(a=><ArticleCard article={a}/>)}</div></>:<div class="clean-empty"><span>Раздел готов</span><h2>Здесь пока нет опубликованных материалов</h2><p>Оболочка, маршруты и поиск сохранены. Добавьте редакционный контент — и он появится автоматически.</p></div>}</section>:<section class="shell clean-empty"><span>{data.label}</span><h2>Раздел использует отдельный интерфейс</h2><p>Перейдите через основную навигацию.</p></section>}
-</BaseLayout>
+<BaseLayout title={`${data.label} — СВАРКОД`} description={data.description}><header class="section-hero shell"><span class="kicker">СОВМЕСТИМЫЙ РАЗДЕЛ</span><h1>{data.label}</h1><p>{data.description} Новая каноническая структура: <a href={data.canonical}>{data.canonical}</a></p></header><section class="shell section-feed">{items.length?<div class="story-grid">{items.map(a=><ArticleCard article={a}/>)}</div>:<div class="clean-empty"><h2>Проверенных материалов пока нет</h2><p>Демо-публикации удалены из production.</p></div>}</section></BaseLayout>

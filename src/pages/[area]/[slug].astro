@@ -1,0 +1,7 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { platformPages } from '../../data/platform';
+export function getStaticPaths(){ return platformPages.map(page=>({params:{area:page.area,slug:page.slug},props:{page}})); }
+const { page } = Astro.props;
+---
+<BaseLayout title={`${page.label} — СВАРКОД`} description={page.description}><header class="page-hero shell"><p class="eyebrow">{page.kicker}</p><h1>{page.label}</h1><p>{page.description}</p></header><section class="shell platform-body"><div class="trust-panel"><strong>Принцип СВАРКОД</strong><p>Раздел публикует только проверенные факты. Официальный источник, редакционная интерпретация, пользовательский контент и коммерческое участие разделяются в данных и интерфейсе.</p></div><div class="platform-grid"><article><span>01</span><h2>Источник</h2><p>Для нормативных и реестровых сведений фиксируется первичный источник и дата последней сверки.</p></article><article><span>02</span><h2>Применимость</h2><p>Информация связывается с ролями, объектами, процессами и сроками, а не публикуется как универсальный совет.</p></article><article><span>03</span><h2>История</h2><p>Существенные изменения получают дату и объяснение; прошлые состояния не переписываются бесследно.</p></article></div></section></BaseLayout>

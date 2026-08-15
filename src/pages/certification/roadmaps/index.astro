@@ -1,0 +1,5 @@
+---
+import { getCollection } from 'astro:content'; import BaseLayout from '../../../layouts/BaseLayout.astro'; import {formatDate} from '../../../lib/content';
+const items=await getCollection('qualificationPaths',({data})=>!data.draft);
+---
+<BaseLayout title="Маршруты аттестации — СВАРКОД"><header class="section-hero shell"><span class="kicker">АТТЕСТАЦИЯ</span><h1>Маршруты</h1><p>Кому требуется процедура, какие предварительные условия, документы, этапы, сроки и источники.</p></header><section class="shell entity-list">{items.map(x=><a href={`/certification/roadmaps/${x.id}/`}><span>{x.data.role}</span><h2>{x.data.title}</h2><p>{x.data.summary}</p><small>Проверено {formatDate(x.data.reviewedAt)}</small></a>)}{!items.length&&<div class="clean-empty"><h2>Проверенные маршруты готовятся</h2><p>Универсальные инструкции без проверенной области применения не публикуются.</p></div>}</section></BaseLayout>
