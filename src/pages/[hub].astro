@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { hubs } from '../data/site';
+import { platformPages } from '../data/platform';
+export function getStaticPaths(){ return Object.keys(hubs).map(hub=>({params:{hub},props:{hub}})); }
+const { hub } = Astro.props;
+const data = hubs[hub];
+const children = platformPages.filter(p=>p.area===hub);
+---
+<BaseLayout title={`${data.label} — СВАРКОД`} description={data.description}><header class="section-hero shell"><span class="kicker">{data.accent}</span><h1>{data.label}</h1><p>{data.title}. {data.description}</p></header><section class="shell hub-grid">{children.map(item=><a href={`/${hub}/${item.slug}/`}><span>{item.kicker}</span><h2>{item.label}</h2><p>{item.description}</p><i>→</i></a>)}</section></BaseLayout>

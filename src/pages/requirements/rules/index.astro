@@ -1,0 +1,5 @@
+---
+import { getCollection } from 'astro:content'; import BaseLayout from '../../../layouts/BaseLayout.astro'; import { formatDate } from '../../../lib/content';
+const items=await getCollection('requirements',({data})=>!data.draft);
+---
+<BaseLayout title="Атомарные требования — СВАРКОД"><header class="section-hero shell"><span class="kicker">НОРМАТИВНЫЙ ГРАФ</span><h1>Требования</h1><p>Одно обязательство — одна карточка с субъектом, действием, источником, сроком и доказательством выполнения.</p></header><section class="shell entity-list">{items.map(x=><a href={`/requirements/rules/${x.id}/`}><span>{x.data.subject}</span><h2>{x.data.title}</h2><p>{x.data.summary}</p><small>Проверено {formatDate(x.data.reviewedAt)}</small></a>)}{!items.length&&<div class="clean-empty"><h2>Атомарные требования ещё не опубликованы</h2><p>Они появятся только после постатейной проверки официальных источников.</p></div>}</section></BaseLayout>

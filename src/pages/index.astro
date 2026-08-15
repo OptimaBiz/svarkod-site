@@ -2,30 +2,21 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
-import { demoArticles, demoDocuments, demoEvents, demoForum, demoOrganizations, demoRatings, demoEnabled } from '../demo-data';
-import { sortArticles, toArticleCard } from '../lib/content';
-const real = sortArticles(await getCollection('articles', ({data})=>!data.draft)).map(a=>({...toArticleCard(a), demo:false}));
-const demo = demoArticles.map(a=>({...a,demo:true}));
-const stories = demoEnabled ? demo : real;
-const lead = stories[0];
-const side = stories.slice(1,4);
-const latest = stories.slice(4,10);
+import { roleCards } from '../data/platform';
+import { sortArticles, toArticleCard, formatDate } from '../lib/content';
+const articles = sortArticles(await getCollection('articles', ({data})=>!data.draft)).map(toArticleCard);
+const docs = await getCollection('documents', ({data})=>!data.draft);
+const orgs = await getCollection('organizations', ({data})=>!data.draft);
+const requirements = await getCollection('requirements', ({data})=>!data.draft);
+const events = (await getCollection('events', ({data})=>!data.draft)).sort((a,b)=>a.data.startsAt.getTime()-b.data.startsAt.getTime());
+const lead = articles[0], side = articles.slice(1,3), latest = articles.slice(3,9);
 ---
 <BaseLayout>
-<section class="front shell">
-  <div class="front-grid">
-    <div class="front-lead">{lead && <ArticleCard article={lead} lead/>}</div>
-    <div class="front-side">{side.map(a=><ArticleCard article={a} compact/>)}</div>
-    <aside class="front-brief"><div class="brief-head"><span>Коротко</span><time>18:14</time></div>{stories.slice(10,15).map(a=><a href={a.demo?`/demo/${a.slug}/`:`/articles/${a.slug}/`}><strong>{a.title}</strong><span>{a.section}</span></a>)}</aside>
-  </div>
-  <div class="front-divider"></div>
-  <div class="front-heading"><span class="kicker">ПОСЛЕДНЕЕ</span><h2>Что важно знать сегодня</h2><a href="/news/">Все материалы →</a></div>
-  <div class="story-grid">{latest.map(a=><ArticleCard article={a}/>)}</div>
-</section>
-
-<section class="section-paper"><div class="shell"><div class="front-heading"><span class="kicker">НОРМЫ</span><h2>Регулирование без пересказов</h2><a href="/norms/">Открыть раздел →</a></div><div class="feature-row">{stories.filter(a=>a.section==='Нормы').slice(0,3).map((a,i)=><ArticleCard article={a} lead={i===0}/>)}</div></div></section>
-
-<section class="workbench shell"><div class="workbench-head"><span class="kicker">РАБОЧИЙ СТОЛ</span><h2>Не только читать — проверять</h2><p>Документы, организации, события и рейтинги связаны с редакционными материалами.</p></div><div class="workbench-grid"><a class="tool-card" href="/documents/"><span>01</span><h3>Документы</h3><strong>{demoDocuments.length || '—'}</strong><p>карточек в демо</p></a><a class="tool-card" href="/organizations/"><span>02</span><h3>Организации</h3><strong>{demoOrganizations.length || '—'}</strong><p>проверяемых профилей</p></a><a class="tool-card" href="/events/"><span>03</span><h3>Календарь</h3><strong>{demoEvents.length || '—'}</strong><p>ближайших событий</p></a><a class="tool-card" href="/ratings/"><span>04</span><h3>Рейтинги</h3><strong>{demoRatings.length || '—'}</strong><p>демо-позиций</p></a></div></section>
-
-<section class="forum-teaser"><div class="shell"><div class="front-heading inverse-heading"><span class="kicker inverse">ФОРУМ</span><h2>Профессиональный разговор</h2><a href="/forum/">Все обсуждения →</a></div><div class="forum-mini">{demoForum.slice(0,4).map(t=><a href="/forum/"><span>{t.tag}</span><strong>{t.title}</strong><small>{t.replies} ответов · {t.last}</small></a>)}</div></div></section>
+<section class="command-bar"><div class="shell"><div><span>РАБОЧАЯ СИСТЕМА</span><strong>От первоисточника — к применимому требованию и действию</strong></div><a href="/requirements/changes/">Что изменилось →</a></div></section>
+<section class="hero-system shell"><div><span class="kicker">СВАРКА · АТТЕСТАЦИЯ · ПРОМЫШЛЕННАЯ БЕЗОПАСНОСТЬ</span><h1>Найти ответ, которому можно доверять</h1><p>СВАРКОД связывает редакционные материалы, нормативные документы, атомарные требования, маршруты аттестации, проверяемые организации и профессиональное сообщество.</p><form action="/search/" method="get" class="hero-search"><input name="q" type="search" placeholder="Документ, требование, центр, технология, организация…"/><button>Найти</button></form><div class="quick-actions"><a href="/requirements/navigator/">Какие требования применимы?</a><a href="/certification/roadmaps/">Как пройти аттестацию?</a><a href="/registry/verify/">Проверить сведения</a><a href="/forum/">Задать вопрос</a></div></div></section>
+<section class="shell role-section"><div class="front-heading"><span class="kicker">ПО РОЛИ</span><h2>Начните со своей задачи</h2></div><div class="role-grid">{roleCards.map(([title,desc,href])=><a href={href}><strong>{title}</strong><span>{desc}</span><i>→</i></a>)}</div></section>
+<section class="section-paper"><div class="shell"><div class="front-heading"><span class="kicker">ИЗДАНИЕ</span><h2>Что важно знать</h2><a href="/edition/">Все материалы →</a></div>{articles.length?<><div class="section-feature">{lead&&<ArticleCard article={lead} lead/>}<div>{side.map(a=><ArticleCard article={a} compact/>)}</div></div><div class="story-grid section-list">{latest.map(a=><ArticleCard article={a}/>)}</div></>:<div class="clean-empty"><h2>Редакционная лента готова к наполнению</h2><p>На главной не публикуются вымышленные новости. Материалы появятся после редакционной проверки.</p></div>}</div></section>
+<section class="workbench shell"><div class="workbench-head"><span class="kicker">РАБОЧИЙ СТОЛ</span><h2>Не только читать — проверять</h2><p>Каждая сущность получает источник, дату сверки и связи с применимыми требованиями.</p></div><div class="workbench-grid"><a class="tool-card" href="/requirements/documents/"><span>01</span><h3>Документы</h3><strong>{docs.length}</strong><p>проверенных карточек</p></a><a class="tool-card" href="/requirements/rules/"><span>02</span><h3>Требования</h3><strong>{requirements.length}</strong><p>атомарных требований</p></a><a class="tool-card" href="/registry/organizations/"><span>03</span><h3>Организации</h3><strong>{orgs.length}</strong><p>проверенных профилей</p></a><a class="tool-card" href="/calendar/regulatory-deadlines/"><span>04</span><h3>Календарь</h3><strong>{events.length}</strong><p>проверенных событий и дат</p></a></div></section>
+<section class="forum-teaser"><div class="shell forum-callout"><div><span class="kicker inverse">СООБЩЕСТВО</span><h2>Форум — отдельный профессиональный контур</h2><p>Без вымышленных просмотров и ответов. На публичном сайте показываются только реальные данные после подключения форумного API.</p></div><a class="button inverse-button" href="/forum/">Открыть шлюз форума →</a></div></section>
+{events.length>0&&<section class="shell timeline"><div class="front-heading"><span class="kicker">КАЛЕНДАРЬ</span><h2>Ближайшие проверенные даты</h2><a href="/events/">Все события →</a></div>{events.slice(0,4).map(e=><article><time><strong>{e.data.startsAt.getDate()}</strong><span>{formatDate(e.data.startsAt)}</span></time><div><span class="event-type">{e.data.category}</span><h2><a href={`/events/${e.id}/`}>{e.data.title}</a></h2><p>{e.data.description}</p><small>{e.data.location}</small></div><span class="event-arrow">→</span></article>)}</section>}
 </BaseLayout>
