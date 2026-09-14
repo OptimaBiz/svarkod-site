@@ -1,73 +1,23 @@
-export const primaryNav = [
-  { href: '/edition/', label: 'Издание' },
-  { href: '/requirements/', label: 'Требования' },
-  { href: '/certification/', label: 'Аттестация' },
+export const nav = [
+  { href: '/news/', label: 'Новости' },
+  { href: '/norms/', label: 'Нормы' },
   { href: '/practice/', label: 'Практика' },
-  { href: '/registry/', label: 'Реестры и рейтинги' },
-  { href: '/community/', label: 'Сообщество' },
-];
-
-export const nav = primaryNav;
-export const utilityNav = [
-  { href: '/calendar/regulatory-deadlines/', label: 'Календарь' },
   { href: '/services/', label: 'Услуги' },
-  { href: '/advertising/', label: 'Реклама' },
-  { href: '/about/', label: 'О проекте' },
+  { href: '/ratings/', label: 'Рейтинги' },
 ];
 
-export const hubs = {
-  edition: {
-    label: 'Издание',
-    accent: 'РЕДАКЦИЯ',
-    title: 'Отраслевое издание без информационного шума',
-    description: 'Новости, аналитика и объяснения с отделением факта, мнения, официального источника и коммерческого участия.',
-    children: ['news', 'analysis', 'explainers', 'investigations', 'interviews', 'opinions', 'authors'],
-  },
-  requirements: {
-    label: 'Требования',
-    accent: 'РЕГУЛИРОВАНИЕ',
-    title: 'От документа — к применимому требованию',
-    description: 'Первоисточники, атомарные требования, сроки действия, переходные положения и навигация по применимости.',
-    children: ['changes', 'documents', 'rules', 'topics', 'industries', 'timeline', 'navigator', 'compare', 'transition-2027'],
-  },
-  certification: {
-    label: 'Аттестация',
-    accent: 'МАРШРУТЫ',
-    title: 'Аттестация и подтверждение готовности без догадок',
-    description: 'Маршруты для персонала и производства: условия, документы, этапы, сроки действия, проверка сведений и центры.',
-    children: ['personnel', 'production', 'industrial-safety', 'professional-qualifications', 'roadmaps', 'documents', 'validity-and-renewal', 'find-center', 'verify', 'faq'],
-  },
-  practice: {
-    label: 'Практика',
-    accent: 'ПРОИЗВОДСТВО',
-    title: 'Инженерная практика сварочного производства',
-    description: 'Процессы, материалы, оборудование, качество, дефекты, контроль, безопасность, автоматизация и рабочие шаблоны.',
-    children: ['processes', 'materials', 'equipment', 'welding-procedures', 'modes-and-parameters', 'quality', 'defects', 'ndt', 'safety', 'automation-and-robotics', 'cases', 'calculators', 'templates', 'glossary'],
-  },
-  registry: {
-    label: 'Реестры и рейтинги',
-    accent: 'ПРОВЕРКА',
-    title: 'Проверяемые сведения вместо рекламного каталога',
-    description: 'Структурированные профили организаций и отраслевых сущностей с источниками, датой сверки и историей изменений.',
-    children: ['certification-centers', 'training-centers', 'organizations', 'sro', 'experts', 'personnel', 'materials', 'equipment', 'technologies', 'laboratories', 'verify'],
-  },
-  community: {
-    label: 'Сообщество',
-    accent: 'ПРОФЕССИОНАЛЫ',
-    title: 'Профессиональный разговор, связанный с источниками',
-    description: 'Экспертные ответы, события и отдельный форумный контур с модерацией, принятыми ответами и ссылками на первоисточники.',
-    children: ['experts', 'answers', 'events', 'jobs', 'associations', 'forum'],
-  },
-} as const;
+export const sections = {
+  news: { label: 'Новости', title: 'Сигналы, которые меняют отрасль', description: 'Решения регуляторов, рынок, люди и производство — с контекстом для тех, кто отвечает за результат.', accent: 'Пульс отрасли' },
+  norms: { label: 'Нормы', title: 'Регулирование — без тумана', description: 'Документы, изменения и редакционные разборы для сварочных работ на опасных производственных объектах.', accent: 'Нормативная база' },
+  practice: { label: 'Практика', title: 'Технология, которая работает в цехе', description: 'Сварка, контроль, аттестация и опыт специалистов — от требований к воспроизводимому результату.', accent: 'Технологии и люди' },
+  services: { label: 'Услуги', title: 'Экспертиза, которой доверяет отрасль', description: 'Помогаем бизнесу говорить с профессиональной аудиторией точно, содержательно и прозрачно.', accent: 'Для компаний' },
+  ratings: { label: 'Рейтинги', title: 'Репутация — в проверяемых данных', description: 'Сравниваем отраслевые организации по открытой методике и подтверждённому опыту специалистов.', accent: 'Индекс доверия' },
+};
 
-export const legacyEditorialSections = {
-  news: { label: 'Новости', articleSections: ['Новости', 'Интервью'] },
-  norms: { label: 'Нормы', articleSections: ['Объясняем', 'Аналитика'] },
-  technologies: { label: 'Технологии', articleSections: ['Технологии', 'Практика'] },
-} as const;
-
-export const directoryTypes = [
-  'СРО', 'Аттестационный центр', 'Учебный центр', 'Лаборатория', 'Производитель оборудования',
-  'Производитель материалов', 'Поставщик', 'Экспертная организация',
+export const articles = [
+  { slug: 'novye-trebovaniya-k-svarke-na-opo', section: 'Нормы', date: '11 августа 2026', read: '8 мин', title: 'Что меняется в требованиях к сварочным работам на ОПО', lead: 'Разбираем логику изменений, зоны ответственности организаций и документы, которые стоит проверить уже сейчас.', featured: true, image: '/images/svarkod-welder-hero.png' },
+  { slug: 'kontrol-svarnyh-soedineniy', section: 'Практика', date: '8 августа 2026', read: '12 мин', title: 'Контроль сварных соединений: как выстроить процесс без формального подхода', lead: 'Практическая схема: от входного контроля до фиксации результатов и работы с несоответствиями.' },
+  { slug: 'intervyu-rukovoditel-svarochnogo-proizvodstva', section: 'Интервью', date: '5 августа 2026', read: '10 мин', title: '«Качество начинается не со шва»: разговор с руководителем производства', lead: 'О подготовке специалистов, цене ошибок и о том, почему регламент должен работать в цехе.' },
+  { slug: 'obzor-izmeneniy-pb', section: 'Новости', date: '2 августа 2026', read: '5 мин', title: 'Главные изменения в промышленной безопасности за месяц', lead: 'Короткий обзор решений и документов, которые затрагивают сварочные организации.' },
+  { slug: 'tehnologiya-orbitalnoy-svarki', section: 'Технологии', date: '29 июля 2026', read: '9 мин', title: 'Орбитальная сварка трубопроводов: возможности и ограничения технологии', lead: 'Где автоматизация даёт предсказуемый результат, а где по-прежнему решает квалификация специалиста.' },
 ];
-export const eventCategories = ['Выставка', 'Конференция', 'Вебинар', 'Обучение', 'Нормативная дата', 'Событие СВАРКОД'];
