@@ -21,3 +21,14 @@ export const articles = [
   { slug: 'obzor-izmeneniy-pb', section: 'Новости', date: '2 августа 2026', read: '5 мин', title: 'Главные изменения в промышленной безопасности за месяц', lead: 'Короткий обзор решений и документов, которые затрагивают сварочные организации.' },
   { slug: 'tehnologiya-orbitalnoy-svarki', section: 'Технологии', date: '29 июля 2026', read: '9 мин', title: 'Орбитальная сварка трубопроводов: возможности и ограничения технологии', lead: 'Где автоматизация даёт предсказуемый результат, а где по-прежнему решает квалификация специалиста.' },
 ];
+
+// Content hubs power the expanded knowledge base while the public navigation
+// retains the approved editorial structure above.
+export const hubs = {
+  edition: { label: 'Издание', accent: 'РЕДАКЦИЯ', title: 'Отраслевое издание без информационного шума', description: 'Новости, аналитика и объяснения с отделением факта, мнения, официального источника и коммерческого участия.', children: ['news', 'analysis', 'explainers', 'interviews', 'authors'] },
+  requirements: { label: 'Требования', accent: 'РЕГУЛИРОВАНИЕ', title: 'От документа — к применимому требованию', description: 'Первоисточники, атомарные требования, сроки действия, переходные положения и навигация по применимости.', children: ['changes', 'documents', 'rules', 'topics', 'timeline', 'navigator'] },
+  certification: { label: 'Аттестация', accent: 'МАРШРУТЫ', title: 'Аттестация и подтверждение готовности без догадок', description: 'Маршруты для персонала и производства: условия, документы, этапы, сроки действия, проверка сведений и центры.', children: ['personnel', 'production', 'roadmaps', 'documents', 'find-center', 'verify'] },
+  practice: { label: 'Практика', accent: 'ПРОИЗВОДСТВО', title: 'Инженерная практика сварочного производства', description: 'Процессы, материалы, оборудование, качество, дефекты, контроль, безопасность, автоматизация и рабочие шаблоны.', children: ['processes', 'materials', 'equipment', 'quality', 'defects', 'ndt', 'safety', 'automation-and-robotics'] },
+  registry: { label: 'Реестры и рейтинги', accent: 'ПРОВЕРКА', title: 'Проверяемые сведения вместо рекламного каталога', description: 'Структурированные профили организаций и отраслевых сущностей с источниками, датой сверки и историей изменений.', children: ['certification-centers', 'organizations', 'sro', 'experts', 'laboratories', 'verify'] },
+  community: { label: 'Сообщество', accent: 'ПРОФЕССИОНАЛЫ', title: 'Профессиональный разговор, связанный с источниками', description: 'Экспертные ответы, события и отдельный форумный контур с модерацией, принятыми ответами и ссылками на первоисточники.', children: ['experts', 'answers', 'events', 'forum'] },
+} as const;

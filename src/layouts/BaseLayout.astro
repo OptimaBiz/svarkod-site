@@ -1,7 +1,8 @@
 ---
 import '../styles/global.css';
+import '../styles/platform.css';
 import { nav } from '../data/site';
-const { title = 'СВАРКОД — Код сварочной отрасли', description = 'Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.' } = Astro.props;
+const { title = 'СВАРКОД — Код сварочной отрасли', description = 'Независимое отраслевое интернет-издание о технологиях сварки, промышленной безопасности и нормативном регулировании.', ogType = 'website' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const currentPath = Astro.url.pathname;
 ---
@@ -13,7 +14,7 @@ const currentPath = Astro.url.pathname;
     <meta name="theme-color" content="#08151d" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:type" content="website" /><meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:type" content={ogType} /><meta property="og:url" content={canonical} />
     <title>{title}</title>
   </head>
   <body>
